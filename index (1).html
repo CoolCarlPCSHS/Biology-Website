@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Metabolic Maze | Bio-Physics Lab</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600;700&family=Unbounded:wght@400;700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<!-- ── START SCREEN ── -->
+<div id="start-screen">
+  <div class="ss-grid-bg"></div>
+  <div class="ss-glow"></div>
+  <div class="ss-content">
+    <div class="ss-label">BIO-PHYSICS LAB · SIMULATION v2.4</div>
+    <div class="ss-title">METABOLIC<br>MAZE</div>
+    <div class="ss-sub">DIGESTIVE PATHWAY SIMULATOR</div>
+    <div class="ss-divider"></div>
+    <div class="ss-stations">
+      <span class="ss-station-tag g">S1 · DIET FILTER</span>
+      <span class="ss-station-tag o">S7 · GIZZARD</span>
+      <span class="ss-station-tag r">S3 · WEIGHTED GATE</span>
+      <span class="ss-station-tag g">S4 · ACID TILT</span>
+      <span class="ss-station-tag b">S2 · VITAMIN STORE</span>
+      <span class="ss-station-tag b">S5 · SMALL INTESTINE</span>
+      <span class="ss-station-tag o">S6 · LARGE INTESTINE</span>
+    </div>
+    <button class="ss-enter-btn" onclick="enterLab()">ENTER LAB</button>
+    <div class="ss-hint">drag bio-samples onto the pipeline to begin simulation</div>
+  </div>
+</div>
+
+<!-- ── RESET BUTTON ── -->
+<button id="reset-btn" onclick="resetLab()">RESET</button>
+
+<aside id="sidebar">
+  <div class="sidebar-title">BIO-SAMPLES</div>
+
+  <div>
+    <div class="con-switch-label">CON SWITCH</div>
+    <div class="switch-btns">
+      <button class="sw-btn carnivore" id="sw-carn" onclick="setMode('carnivore')">O=EX</button>
+      <button class="sw-btn herbivore active" id="sw-herb" onclick="setMode('herbivore')">D=HV</button>
+    </div>
+    <div class="switch-legend">
+      <span class="sw-leg" style="color:var(--red)">O=Carnivore</span>
+      <span class="sw-leg" style="color:var(--green)">D=Herbivore</span>
+    </div>
+  </div>
+
+  <div class="food-grid" id="food-grid"></div>
+  <div id="log"><span class="lc-muted">// drop a sample to begin</span></div>
+  <button class="clear-btn" onclick="clearAll()">CLEAR ALL</button>
+</aside>
+
+<div id="canvas-wrap">
+  <div id="pipeline">
+    <svg id="pipes-svg" xmlns="http://www.w3.org/2000/svg"></svg>
+    <div id="drop-overlay"></div>
+
+    <!-- Entry label -->
+    <div class="node" id="n-entry">
+      <div class="node-desc">↓ CON SWITCH INPUT</div>
+    </div>
+
+    <!-- S1 Carnivore -->
+    <div class="node" id="n-s1-carn">
+      <div class="node-badge">S1 — LEFT</div>
+      <div class="node-title">CARNIVORE</div>
+      <div class="node-desc">Animal-derived only. Proteins &amp; fats enter this branch.</div>
+      <div class="station-sketch-wrap"><img class="station-sketch-img" src="Other/station 1A.png" alt="Station 1 — Diet Filter"></div>
+      <div class="chip-row" id="chips-s1-carn"></div>
+    </div>
+
+    <!-- S1 Herbivore -->
+    <div class="node" id="n-s1-herb">
+      <div class="node-badge">S1 — RIGHT</div>
+      <div class="node-title">HERBIVORE DIET ONLY</div>
+      <div class="node-desc">Plant foods only. Routed through full digestive path.</div>
+      <div class="station-sketch-wrap"><img class="station-sketch-img" src="Other/station 1A.png" alt="Station 1 — Diet Filter"></div>
+      <div class="chip-row" id="chips-s1-herb"></div>
+    </div>
+
+    <!-- S7 Gizzard -->
+    <div class="node" id="n-s7">
+      <div class="node-badge">S7 — DETACHABLE</div>
+      <div class="node-title">GIZZARD</div>
+      <div class="node-desc">Mechanical grinding. Herbivore path only. Breaks fibrous plant matter before enzymatic digestion.</div>
+      <div class="station-sketch-wrap"><img class="station-sketch-img" src="Other/station 7.png" alt="Station 7 — Comparative Adaptor"></div>
+      <div class="chip-row" id="chips-s7"></div>
+    </div>
+
+    <!-- S3 Weighted Gate -->
+    <div class="node" id="n-s3">
+      <div class="node-badge">S3 — 0/3 QUEUED</div>
+      <div class="node-title">WEIGHTED GATE</div>
+      <div class="node-desc">Accumulates 3 qualifying samples before releasing batch downstream.</div>
+      <div class="phosphorus-pillar" id="phosphorus-pillar" onclick="removePhosphorusPillar()">
+        <div class="pillar-icon">⭐</div>
+        <div class="pillar-label">PHOSPHORUS PILLAR</div>
+        <div class="pillar-hint">click to remove</div>
+      </div>
+      <div class="station-sketch-wrap">
+        <img class="station-sketch-img s3-img" id="s3-img-closed" src="Other/station 3B.jpeg" alt="Station 3 — Gate Closed">
+        <img class="station-sketch-img s3-img s3-hidden" id="s3-img-open" src="Other/station 3A.jpeg" alt="Station 3 — Gate Open">
+      </div>
+      <div class="gate-bar"><div class="gate-bar-fill"></div></div>
+      <div style="font-size:7px;color:var(--red);letter-spacing:1px">← BATCH THRESHOLD</div>
+      <div class="s3-collapsed-msg s3-hidden" id="s3-collapsed-msg">⚠ STRUCTURAL COLLAPSE — STATION OFFLINE<br><span style="font-size:6px;color:var(--muted)">Reset lab to restore</span></div>
+      <div class="chip-row" id="chips-s3"></div>
+    </div>
+
+    <!-- S4 Acid Splitter -->
+    <div class="node" id="n-s4">
+      <div class="node-badge">S4 — ACID SPLITTER</div>
+      <div class="node-title">HIGH ACID TILT</div>
+      <div class="node-desc">Gastric pH chamber. Lipids diverge left → S2 Vitamin. Protein/Carb right → S5 Small Intestine.</div>
+      <div class="station-sketch-wrap"><img class="station-sketch-img" src="Other/station 4.png" alt="Station 4 — Pepsin pH Gate"></div>
+      <button class="acid-tilt-btn" id="acid-tilt-btn" onclick="triggerAcidTilt()">⚗ ACTIVATE HIGH-ACID TILT</button>
+      <div class="s4-status" id="s4-status">STOMACH IDLE — 0 HELD</div>
+      <div style="display:flex;gap:8px;margin-top:7px">
+        <div style="flex:1;text-align:center;font-size:7px;color:var(--blue);border:1px solid rgba(58,142,246,0.3);padding:5px;border-radius:5px">← LIPID<br><span style="color:var(--muted)">→ S2 Vitamin</span></div>
+        <div style="font-size:11px;color:var(--muted);align-self:center">⇅</div>
+        <div style="flex:1;text-align:center;font-size:7px;color:var(--green);border:1px solid rgba(29,184,126,0.3);padding:5px;border-radius:5px">PROTEIN/CARB →<br><span style="color:var(--muted)">→ S5 SmInt</span></div>
+      </div>
+      <div class="chip-row" id="chips-s4"></div>
+    </div>
+
+    <!-- S2 Vitamin -->
+    <div class="node" id="n-s2">
+      <div class="node-badge">S2 — VITAMIN</div>
+      <div class="node-title">VITAMIN STORE</div>
+      <div class="node-desc">Fat-soluble vitamins stored. Excess expelled to waste.</div>
+      <div class="station-sketch-wrap"><img class="station-sketch-img" src="Other/station 2.png" alt="Station 2 — Vitamin Partition"></div>
+      <div class="chip-row" id="chips-s2"></div>
+    </div>
+
+    <!-- Storage -->
+    <div class="node" id="n-storage">
+      <div class="node-badge" style="color:var(--blue)">STORAGE</div>
+      <div class="node-title" style="color:var(--blue);font-size:7px">LIPID RESERVE</div>
+      <div class="chip-row" id="chips-storage"></div>
+    </div>
+
+    <!-- Waste Left -->
+    <div class="node" id="n-waste-left">
+      <div class="node-badge" style="color:var(--red)">WASTE</div>
+      <div class="node-title" style="color:var(--red);font-size:7px">LIPID EXCESS</div>
+      <div class="chip-row" id="chips-waste-left"></div>
+    </div>
+
+    <!-- S5 Small Intestine -->
+    <div class="node" id="n-s5">
+      <div class="node-badge">S5</div>
+      <div class="node-title">SMALL INTESTINE</div>
+      <div class="enzyme-filter"></div>
+      <div style="font-size:7px;color:var(--blue);letter-spacing:1px;margin-bottom:4px">← ENZYMES CANNOT PASS</div>
+      <div class="node-desc">Absorption gate. Lipids → Lymph. Protein/Carb → Capillary. Residue → S6.</div>
+      <div class="station-sketch-wrap"><img class="station-sketch-img" src="Other/station 5.png" alt="Station 5 — Nutrient Divergence"></div>
+      <div style="display:flex;gap:5px;margin-top:6px;flex-wrap:wrap">
+        <div style="font-size:6.5px;color:#a855f7;border:1px solid rgba(168,85,247,0.3);padding:3px 5px;border-radius:4px">LIPID → LYMPH ↗</div>
+        <div style="font-size:6.5px;color:#06b6d4;border:1px solid rgba(6,182,212,0.3);padding:3px 5px;border-radius:4px">PROT/CARB → CAP ↘</div>
+        <div style="font-size:6.5px;color:var(--orange);border:1px solid rgba(240,165,0,0.3);padding:3px 5px;border-radius:4px">RESIDUE → S6 ↓</div>
+      </div>
+      <div class="chip-row" id="chips-s5"></div>
+    </div>
+
+    <!-- Lymph circle -->
+    <div id="n-lymph">
+      <div class="node-title">LYMPH</div>
+      <div style="font-size:7px;color:var(--muted);line-height:1.5;text-align:center">Lacteals absorb chylomicrons</div>
+      <div class="chip-row" id="chips-lymph" style="justify-content:center"></div>
+    </div>
+
+    <!-- Capillary Pipe circle -->
+    <div id="n-capillary">
+      <div class="node-title">CAPILLARY<br>PIPE</div>
+      <div style="font-size:7px;color:var(--muted);line-height:1.5;text-align:center">Portal vein uptake</div>
+      <div class="chip-row" id="chips-capillary" style="justify-content:center"></div>
+    </div>
+
+    <!-- S6 Large Intestine -->
+    <div class="node" id="n-s6">
+      <div class="node-badge">S6</div>
+      <div class="node-title">LARGE INTESTINE</div>
+      <div class="filter-bars"><div class="fbar"></div><div class="fbar"></div><div class="fbar"></div></div>
+      <div style="font-size:7px;color:var(--orange);letter-spacing:1px;margin-bottom:4px">← BACTERIAL FILTERS</div>
+      <div class="node-desc">Fermentation &amp; water reabsorption. Bacterial flora processes remaining fiber.</div>
+      <div class="station-sketch-wrap">
+        <img class="station-sketch-img s6-flora-img" id="s6-flora-alive" src="Other/s6-flora-alive.png" alt="Station 6 — Flora Alive">
+        <img class="station-sketch-img s6-flora-img s6-hidden" id="s6-flora-dead" src="Other/s6-flora-dead.png" alt="Station 6 — Flora Dead">
+      </div>
+      <button class="flora-toggle-btn" id="flora-toggle-btn" onclick="toggleFlora()">☠ KILL FLORA</button>
+      <div class="s6-flora-status" id="s6-flora-status">FLORA STATUS: ALIVE</div>
+      <div class="chip-row" id="chips-s6"></div>
+    </div>
+
+    <!-- Waste Bottom -->
+    <div class="node" id="n-waste-bot">
+      <div class="node-badge" style="color:var(--red)">WASTE</div>
+      <div class="node-title" style="color:var(--red);font-size:7px">EXCRETION</div>
+      <div class="chip-row" id="chips-waste-bot"></div>
+    </div>
+
+  </div>
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>

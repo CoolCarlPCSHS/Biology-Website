@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Metabolic Maze | Bio-Physics Lab</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+    <!-- ═══════════════════════════════════
+         SCREEN 1: LANDING PAGE
+    ═══════════════════════════════════ -->
+    <div id="landing-screen" class="screen active">
+        <div class="landing-bg">
+            <div class="hex-grid"></div>
+            <div class="orb orb-1"></div>
+            <div class="orb orb-2"></div>
+            <div class="orb orb-3"></div>
+        </div>
+
+        <div class="landing-content">
+            <div class="landing-badge">BIO-PHYSICS INTERACTIVE</div>
+
+            <h1 class="landing-title">
+                <span class="title-metabolic">METABOLIC</span>
+                <span class="title-maze">MAZE</span>
+            </h1>
+
+            <p class="landing-subtitle">Navigate the inner workings of digestion through seven<br>interactive biological stations.</p>
+
+            <div class="landing-stats">
+                <div class="stat-item">
+                    <span class="stat-num">7</span>
+                    <span class="stat-label">Stations</span>
+                </div>
+                <div class="stat-divider"></div>
+                <div class="stat-item">
+                    <span class="stat-num">10</span>
+                    <span class="stat-label">Bio-Samples</span>
+                </div>
+                <div class="stat-divider"></div>
+                <div class="stat-item">
+                    <span class="stat-num">∞</span>
+                    <span class="stat-label">Simulations</span>
+                </div>
+            </div>
+
+            <button id="play-btn" class="play-button" onclick="showGameScreen()">
+                <span class="play-btn-text">ENTER LAB</span>
+                <span class="play-btn-icon">▶</span>
+            </button>
+        </div>
+
+        <div class="landing-footer">
+            <label class="theme-toggle-wrap" title="Toggle theme">
+                <input type="checkbox" id="theme-toggle-landing" onchange="toggleTheme(this.checked)">
+                <span class="toggle-track">
+                    <span class="toggle-thumb">
+                        <span class="toggle-icon-sun">☀</span>
+                        <span class="toggle-icon-moon">☾</span>
+                    </span>
+                </span>
+                <span class="toggle-label">THEME</span>
+            </label>
+        </div>
+    </div>
+
+    <!-- ═══════════════════════════════════
+         SCREEN 2: GAME SCREEN
+    ═══════════════════════════════════ -->
+    <div id="game-screen" class="screen">
+
+        <!-- Top Bar -->
+        <header class="game-topbar">
+            <div class="topbar-left">
+                <div class="topbar-logo">
+                    <span class="logo-m">M</span><span class="logo-text">ETABOLIC MAZE</span>
+                </div>
+                <div class="topbar-sep"></div>
+                <span class="topbar-subtitle">Bio-Physics Lab</span>
+            </div>
+            <div class="topbar-right">
+                <label class="theme-toggle-wrap" title="Toggle theme">
+                    <input type="checkbox" id="theme-toggle-game" onchange="toggleTheme(this.checked)">
+                    <span class="toggle-track">
+                        <span class="toggle-thumb">
+                            <span class="toggle-icon-sun">☀</span>
+                            <span class="toggle-icon-moon">☾</span>
+                        </span>
+                    </span>
+                    <span class="toggle-label">THEME</span>
+                </label>
+            </div>
+        </header>
+
+        <!-- Main game layout -->
+        <div class="game-body">
+
+            <!-- LEFT: Simulation Area -->
+            <div class="sim-column">
+
+                <!-- Food Inventory -->
+                <aside id="food-inventory" class="glass-panel food-panel">
+                    <div class="panel-header">
+                        <h3>BIO-SAMPLES</h3>
+                        <span class="status-dot"></span>
+                    </div>
+                    <div id="food-items-container"></div>
+                </aside>
+
+                <!-- Playground -->
+                <div class="playground-wrap">
+                    <!-- Zoom Controls (left) -->
+                    <div class="zoom-controls">
+                        <button class="zoom-btn" id="zoom-in" title="Zoom In">+</button>
+                        <div class="zoom-track">
+                            <div class="zoom-thumb" id="zoom-thumb"></div>
+                        </div>
+                        <button class="zoom-btn" id="zoom-out" title="Zoom Out">−</button>
+                        <span class="zoom-label" id="zoom-label">100%</span>
+                    </div>
+
+                    <div id="playground-outer">
+                        <div id="playground-inner">
+                            <div id="playground">
+                                <div class="grid-overlay"></div>
+                                <div class="empty-state-hint">
+                                    <div class="pulse-ring"></div>
+                                    <p>DROP ELEMENTS HERE TO BEGIN SIMULATION</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Scroll Controls (right) -->
+                    <div class="scroll-controls">
+                        <button class="zoom-btn" id="scroll-up" title="Scroll Up">↑</button>
+                        <div class="zoom-track" id="scroll-track">
+                            <div class="zoom-thumb" id="scroll-thumb"></div>
+                        </div>
+                        <button class="zoom-btn" id="scroll-down" title="Scroll Down">↓</button>
+                        <span class="zoom-label">SCROLL</span>
+                    </div>
+                </div>
+
+                <!-- Station Dock -->
+                <footer id="station-inventory" class="glass-panel station-dock">
+                    <div class="panel-header">
+                        <h3>LABORATORY MODULES</h3>
+                    </div>
+                    <div class="station-items">
+                        <div class="station-template glass-card" draggable="true" data-station="station1">
+                            <div class="module-icon">▼</div>
+                            <div class="module-info"><h4>STATION 01</h4><p>HERBIVORE FILTER</p></div>
+                        </div>
+                        <div class="station-template glass-card" draggable="true" data-station="station2">
+                            <div class="module-icon">Y</div>
+                            <div class="module-info"><h4>STATION 02</h4><p>SOLUBILITY MANIFOLD</p></div>
+                        </div>
+                        <div class="station-template glass-card" draggable="true" data-station="station3">
+                            <div class="module-icon">🦴</div>
+                            <div class="module-info"><h4>STATION 03</h4><p>STRESS TEST</p></div>
+                        </div>
+                        <div class="station-template glass-card" draggable="true" data-station="station4">
+                            <div class="module-icon">🧪</div>
+                            <div class="module-info"><h4>STATION 04</h4><p>PEPSIN pH GATE</p></div>
+                        </div>
+                        <div class="station-template glass-card" draggable="true" data-station="station5">
+                            <div class="module-icon">⇅</div>
+                            <div class="module-info"><h4>STATION 05</h4><p>NUTRIENT DIVERGE</p></div>
+                        </div>
+                        <div class="station-template glass-card" draggable="true" data-station="station6">
+                            <div class="module-icon">🛡️</div>
+                            <div class="module-info"><h4>STATION 06</h4><p>MICROBIOME BLOCK</p></div>
+                        </div>
+                        <div class="station-template glass-card" draggable="true" data-station="station7">
+                            <div class="module-icon">🔄</div>
+                            <div class="module-info"><h4>STATION 07</h4><p>COMP. ADAPTOR</p></div>
+                        </div>
+                    </div>
+                </footer>
+            </div>
+
+            <!-- RIGHT: Station Guide Panel -->
+            <aside class="guide-panel glass-panel">
+                <div class="panel-header">
+                    <h3>STATION GUIDE</h3>
+                </div>
+
+                <div class="guide-tabs">
+                    <button class="tab-btn active" data-tab="1" onclick="showTab(1)">S1</button>
+                    <button class="tab-btn" data-tab="2" onclick="showTab(2)">S2</button>
+                    <button class="tab-btn" data-tab="3" onclick="showTab(3)">S3</button>
+                    <button class="tab-btn" data-tab="4" onclick="showTab(4)">S4</button>
+                    <button class="tab-btn" data-tab="5" onclick="showTab(5)">S5</button>
+                    <button class="tab-btn" data-tab="6" onclick="showTab(6)">S6</button>
+                    <button class="tab-btn" data-tab="7" onclick="showTab(7)">S7</button>
+                </div>
+
+                <div class="guide-content">
+
+                    <!-- Station 1 -->
+                    <div class="station-info active" data-info="1">
+                        <div class="info-badge">STATION 01</div>
+                        <h2 class="info-title">The Herbivore Intake</h2>
+                        <p class="info-concept">Simulates selective herbivore feeding — only plant-based foods pass the biological filter.</p>
+                        <div class="info-section">
+                            <div class="info-label">✅ ACCEPTED FUEL</div>
+                            <div class="tag-list">
+                                <span class="tag green">🥜 Nuts</span>
+                                <span class="tag green">🍃 Leaves</span>
+                                <span class="tag green">🍎 Berries</span>
+                                <span class="tag green">🥕 Carrot</span>
+                                <span class="tag green">🥬 Lettuce</span>
+                            </div>
+                        </div>
+                        <div class="info-section">
+                            <div class="info-label">❌ REJECTED ITEMS</div>
+                            <div class="tag-list">
+                                <span class="tag red">🥩 Beef</span>
+                                <span class="tag red">🍗 Chicken</span>
+                                <span class="tag red">🐟 Fish</span>
+                                <span class="tag red">🥓 Pork</span>
+                            </div>
+                        </div>
+                        <div class="info-note">
+                            💡 Carnivore items will flash <strong>red</strong> and be rejected from the simulation. Herbivore items flash <strong>green</strong> and continue.
+                        </div>
+                    </div>
+
+                    <!-- Station 2 -->
+                    <div class="station-info" data-info="2">
+                        <div class="info-badge">STATION 02</div>
+                        <h2 class="info-title">Vitamin Partition</h2>
+                        <p class="info-concept">Models the difference between fat-soluble and water-soluble vitamins and their absorption routes.</p>
+                        <div class="info-section">
+                            <div class="info-label">💧 WATER-SOLUBLE PATH</div>
+                            <p class="info-desc">Flows <strong>right</strong> into a waste container — these vitamins cannot be stored and are excreted if not used immediately.</p>
+                        </div>
+                        <div class="info-section">
+                            <div class="info-label">🧈 FAT-SOLUBLE PATH</div>
+                            <p class="info-desc">Diverted <strong>left</strong> into a long-term storage tank — vitamins A, D, and K accumulate in fatty tissue.</p>
+                        </div>
+                        <div class="info-note">
+                            💡 Watch how food items physically diverge to different sides after passing through the partition.
+                        </div>
+                    </div>
+
+                    <!-- Station 3 -->
+                    <div class="station-info" data-info="3">
+                        <div class="info-badge">STATION 03</div>
+                        <h2 class="info-title">Nutritional Stress Test</h2>
+                        <p class="info-concept">Demonstrates the consequences of nutrient deficiency and insufficient energy on biological structures.</p>
+                        <div class="info-section">
+                            <div class="info-label">🦴 PHOSPHORUS PILLAR</div>
+                            <p class="info-desc">A structural pillar labeled "Phosphorus" represents skeletal support. The system becomes <em>unstable</em> without it.</p>
+                        </div>
+                        <div class="info-section">
+                            <div class="info-label">⚡ ENERGY GATE</div>
+                            <p class="info-desc">The gate only opens when sufficient food volume is dropped. Below the threshold, the gate stays <strong>closed</strong> and blocks progress.</p>
+                        </div>
+                        <div class="info-note">
+                            💡 Try adding many items at once versus just one to see the gate behavior change.
+                        </div>
+                    </div>
+
+                    <!-- Station 4 -->
+                    <div class="station-info" data-info="4">
+                        <div class="info-badge">STATION 04</div>
+                        <h2 class="info-title">Pepsin pH Gate</h2>
+                        <p class="info-concept">Simulates the acidic stomach environment required for protein digestion via the enzyme Pepsin.</p>
+                        <div class="info-section">
+                            <div class="info-label">🧪 ACID TILT MECHANISM</div>
+                            <p class="info-desc">A protein bead is only released when a <strong>high-acid tilt</strong> is triggered — mimicking the stomach's low pH (≈1.5–2).</p>
+                        </div>
+                        <div class="info-section">
+                            <div class="info-label">🔬 NEUTRALIZATION ZONE</div>
+                            <p class="info-desc">As the bead moves into the intestine section, the track levels out — representing pH neutralization by the pancreas, deactivating Pepsin.</p>
+                        </div>
+                        <div class="info-note">
+                            💡 The enzyme only works in acidic zones. Observe how the bead's behavior changes as pH shifts.
+                        </div>
+                    </div>
+
+                    <!-- Station 5 -->
+                    <div class="station-info" data-info="5">
+                        <div class="info-badge">STATION 05</div>
+                        <h2 class="info-title">Nutrient Divergence</h2>
+                        <p class="info-concept">Models the different absorption pathways of lipids versus carbohydrates and proteins in the small intestine.</p>
+                        <div class="info-section">
+                            <div class="info-label">🫙 LIPID ROUTE — LACTEAL/LYMPH</div>
+                            <p class="info-desc">Fat particles are too large for direct capillary absorption. They enter the <strong>lacteal lymph pipe</strong> and bypass the portal vein system.</p>
+                        </div>
+                        <div class="info-section">
+                            <div class="info-label">🩸 CARBS & PROTEINS — CAPILLARY</div>
+                            <p class="info-desc">Smaller molecules like glucose and amino acids absorb directly into the <strong>capillary bloodstream</strong> via the portal vein.</p>
+                        </div>
+                        <div class="info-note">
+                            💡 Each macronutrient takes a different route — neither path is "better," they serve different physiological purposes.
+                        </div>
+                    </div>
+
+                    <!-- Station 6 -->
+                    <div class="station-info" data-info="6">
+                        <div class="info-badge">STATION 06</div>
+                        <h2 class="info-title">Microbiome Blockade</h2>
+                        <p class="info-concept">Represents the gut microbiome's role in the large intestine, particularly its effect on water reabsorption.</p>
+                        <div class="info-section">
+                            <div class="info-label">🛡️ FLORA INTACT STATE</div>
+                            <p class="info-desc">With <em>Bacterial Flora</em> present, material moves slowly — water is reabsorbed properly as bacteria regulate transit time.</p>
+                        </div>
+                        <div class="info-section">
+                            <div class="info-label">💊 ANTIBIOTIC STATE</div>
+                            <p class="info-desc">Click <strong>ANTIBIOTICS</strong> to destroy the flora. Watch particles accelerate — water rushes through unabsorbed, simulating diarrhea.</p>
+                        </div>
+                        <div class="info-note">
+                            💡 Drag Station 6 onto the playground, then use the buttons within it to toggle the bacterial flora state.
+                        </div>
+                    </div>
+
+                    <!-- Station 7 -->
+                    <div class="station-info" data-info="7">
+                        <div class="info-badge">STATION 07</div>
+                        <h2 class="info-title">Comparative Adaptor</h2>
+                        <p class="info-concept">Demonstrates anatomical digestive differences between a seed-eating sparrow and a carnivorous hawk.</p>
+                        <div class="info-section">
+                            <div class="info-label">🐦 SPARROW SETUP</div>
+                            <p class="info-desc">Includes a <strong>gizzard module</strong> filled with pebbles/sand for mechanical grinding of seeds. Features a <em>longer</em> digestive tract for plant matter.</p>
+                        </div>
+                        <div class="info-section">
+                            <div class="info-label">🦅 HAWK SETUP</div>
+                            <p class="info-desc">No gizzard required — meat is chemically digested. Features a <em>shorter</em> digestive tract optimized for high-protein processing.</p>
+                        </div>
+                        <div class="info-note">
+                            💡 Digestive anatomy is an adaptation — form follows function based on dietary needs across species.
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- Exit Button -->
+                <div class="guide-exit">
+                    <button class="exit-btn" onclick="showLandingScreen()">
+                        <span>⟵</span> EXIT LAB
+                    </button>
+                </div>
+            </aside>
+
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
